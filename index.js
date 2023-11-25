@@ -14,6 +14,21 @@ app.use(cors({
 app.use(express.json())
 app.use(cookieParser())
 
+const verifyToken = async (req, res, next) => {
+  const token = req.cookies?.token
+  // console.log(token)
+  if (!token) {
+    return res.status(401).send({ message: 'unauthorized access' })
+  }
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      console.log(err)
+      return res.status(401).send({ message: 'unauthorized access' })
+    }
+    req.user = decoded
+    next()
+  })
+}
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = `mongodb+srv://${process.env.USER_DB}:${process.env.USER_PASS}@cluster0.agg5tyw.mongodb.net/?retryWrites=true&w=majority`;
@@ -27,7 +42,8 @@ const client = new MongoClient(uri, {
   }
 });
 
-
+const database = client.db('ClickDwells');
+const propertiesCollection = database.collection('properties');
 
 async function run() {
   try {
@@ -50,6 +66,7 @@ async function run() {
         .send({ success: true })
     })
     
+    //? Clear cookie
     app.post('/logout', async (req, res) => {
         const user = req.body;
         const token = req.cookies.token;
@@ -61,6 +78,15 @@ async function run() {
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
           })
           .send({ success: true })
+    })
+
+
+    //? Service related api
+    //? Save agent added property.
+    app.post('/properties', verifyToken, async(req, res) => {
+       const property = req.body;
+       const result = await propertiesCollection.insertOne(property);
+       res.send(result);
     })
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
