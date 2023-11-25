@@ -33,12 +33,14 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
+
+    //? Auth related api jwt.
     app.post('/jwt', async(req, res) => {
         const user = req.body;
         const secret = process.env.ACCESS_TOKEN_SECRET;
-        console.log( 'Jwt for user', user);
+        // console.log( 'Jwt for user', user);
         const token = jwt.sign(user, secret, {expiresIn : "1h"});
-        console.log(token, 'token');
+        // console.log(token, 'token');
         res
         .cookie('token', token, {
           httpOnly: true,
@@ -48,6 +50,18 @@ async function run() {
         .send({ success: true })
     })
     
+    app.post('/logout', async (req, res) => {
+        const user = req.body;
+        const token = req.cookies.token;
+        // console.log(user, 'user has a token', token);
+        res
+          .clearCookie('token', {
+            maxAge: 0,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+          })
+          .send({ success: true })
+    })
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
