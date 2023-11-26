@@ -47,6 +47,7 @@ const client = new MongoClient(uri, {
 const database = client.db('ClickDwells');
 const propertiesCollection = database.collection('properties');
 const usersCollection = database.collection('users');
+const wishlistCollection = database.collection('wishlist');
 
 async function run() {
   try {
@@ -156,6 +157,12 @@ async function run() {
        res.send(result);
     })
 
+    //? Save wishlist of user
+    app.post('/wishlist', async(req, res) => {
+       const property = req.body;
+       const result = await wishlistCollection.insertOne(property);
+       res.send(result);
+    })
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
