@@ -48,6 +48,7 @@ const database = client.db('ClickDwells');
 const propertiesCollection = database.collection('properties');
 const usersCollection = database.collection('users');
 const wishlistCollection = database.collection('wishlist');
+const offeredCollection = database.collection('offered');
 
 async function run() {
   try {
@@ -157,6 +158,15 @@ async function run() {
       res.send(result);
     })
 
+    //? Get user specific single wishlist property.
+    app.get('/wishlist/:id', async(req, res) => {
+      const id = req.params.id;
+      const email = req.query.email;
+      const query = { _id : new ObjectId(id) }
+      const result = await wishlistCollection.findOne(query);
+      res.send(result);
+    })
+
 
     //? Save agent added property.
     app.post('/properties', verifyToken, async(req, res) => {
@@ -170,6 +180,13 @@ async function run() {
        const property = req.body;
        const result = await wishlistCollection.insertOne(property);
        res.send(result);
+    })
+
+    //? Save user offered property.
+    app.post('/offeredProperty', async (req, res) => {
+      const offeredProperty = req.body;
+      const result = await offeredCollection.insertOne(offeredProperty);
+      res.send(result);
     })
 
     // Send a ping to confirm a successful connection
