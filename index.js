@@ -14,6 +14,8 @@ app.use(cors({
 app.use(express.json())
 app.use(cookieParser())
 
+
+//? Verify token
 const verifyToken = async (req, res, next) => {
   const token = req.cookies?.token
   // console.log(token)
@@ -44,6 +46,7 @@ const client = new MongoClient(uri, {
 
 const database = client.db('ClickDwells');
 const propertiesCollection = database.collection('properties');
+const usersCollection = database.collection('users');
 
 async function run() {
   try {
@@ -80,14 +83,56 @@ async function run() {
           .send({ success: true })
     })
 
+    //? User api
+    //? Save user
+    app.put('/users/:email', async (req, res) => {
+      const email = req.params.email
+      const user = req.body
+      const query = { email: email }
+      const options = { upsert: true }
+      const isExist = await usersCollection.findOne(query)
+      console.log('Is user exist', isExist)
+      if (isExist) {
+        if(user?.status === 'Requested') {
+          const result = await usersCollection.updateOne(query, {
+            $set : { status : user?.status }
+            },
+            options
+            )
+          return  res.send(result);
+        }else {
+          return res.send(isExist)
+        }
+      } 
+
+      const result = await usersCollection.updateOne(
+        query,
+        {
+          $set: { ...user },
+        },
+        options
+      )
+      res.send(result)
+    })
 
     //? Service related api
+    //? Get all agent properties.
+    // app.get('/properties/:email', async(req, res) => {
+    //   const email = req.params.email;
+    //   const query = { email : email };
+    //   const result = await propertiesCollection.find(query).toArray();
+    //   res.send(result);
+    // })
+
+
     //? Save agent added property.
     app.post('/properties', verifyToken, async(req, res) => {
        const property = req.body;
        const result = await propertiesCollection.insertOne(property);
        res.send(result);
     })
+
+
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
