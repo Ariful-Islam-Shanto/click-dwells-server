@@ -149,6 +149,14 @@ async function run() {
       res.send(result);
     })
 
+    //? Get user specific all wishlist property.
+    app.get('/wishlist', async(req, res) => {
+      const email = req.query.email;
+      const query = { 'user.email' : email }
+      const result = await wishlistCollection.find(query).toArray();
+      res.send(result);
+    })
+
 
     //? Save agent added property.
     app.post('/properties', verifyToken, async(req, res) => {
