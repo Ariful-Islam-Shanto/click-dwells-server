@@ -32,7 +32,7 @@ const verifyToken = async (req, res, next) => {
   })
 }
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.USER_DB}:${process.env.USER_PASS}@cluster0.agg5tyw.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -135,11 +135,18 @@ async function run() {
     //? Get all the verified property
     app.get('/properties', async(req, res) =>{
       const status = req.query.status;
-      console.log(status);
       const query = { status : status };
       const result = await propertiesCollection.find(query).toArray();
       res.send(result);
     } )
+
+    //? Get single data by id
+    app.get('/property/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = { _id : new ObjectId(id) };
+      const result = await propertiesCollection.findOne(query);
+      res.send(result);
+    })
 
 
     //? Save agent added property.
