@@ -167,6 +167,13 @@ async function run() {
       res.send(result);
     })
 
+    //? Get all offered property for agent
+    app.get('/offeredProperty', async(req, res) => {
+      const email = req.query.email;
+      const query = { email : email };
+      const result = await offeredCollection.find(query).toArray();
+      res.send(result)
+    })
 
     //? Save agent added property.
     app.post('/properties', verifyToken, async(req, res) => {
