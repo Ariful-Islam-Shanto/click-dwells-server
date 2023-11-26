@@ -115,14 +115,31 @@ async function run() {
       res.send(result)
     })
 
+     //? Get user role
+     app.get('/getRole/:email', async(req, res) => {
+      const email = req.params.email;
+      const query = { email : email };
+      const result = await usersCollection.findOne(query);
+      res.send(result)
+    })
+
     //? Service related api
     //? Get all agent properties.
-    // app.get('/properties/:email', async(req, res) => {
-    //   const email = req.params.email;
-    //   const query = { email : email };
-    //   const result = await propertiesCollection.find(query).toArray();
-    //   res.send(result);
-    // })
+    app.get('/properties/:email', async(req, res) => {
+      const email = req.params.email;
+      const query = { "agent.email" : email };
+      const result = await propertiesCollection.find(query).toArray();
+      res.send(result);
+    })
+
+    //? Get all the verified property
+    app.get('/properties', async(req, res) =>{
+      const status = req.query.status;
+      console.log(status);
+      const query = { status : status };
+      const result = await propertiesCollection.find(query).toArray();
+      res.send(result);
+    } )
 
 
     //? Save agent added property.
