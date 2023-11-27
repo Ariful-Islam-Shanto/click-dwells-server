@@ -175,6 +175,47 @@ async function run() {
       res.send(result)
     })
 
+    //? update offered property status to accepted or rejected
+    app.put('/updateOfferedStatus/:id', async (req, res) => {
+      const acceptedId = req.params.id;
+      const status = req.query.status;
+      
+      console.log(acceptedId, status);
+      if(!status || !acceptedId) {
+        return res.send({message : 'no status found'})
+      }
+      
+      const query = { _id : new ObjectId(acceptedId)}
+
+      //? Find the accepted id data.
+      const acceptedOfferData = await offeredCollection.findOne(query);
+
+      if(!acceptedOfferData) {
+        return res.status(404).send({ error: 'Offer not found' });
+      }
+  
+      //? Now update the accepted offer status.
+      await offeredCollection.updateOne(query, {
+        $set : {
+          status : status
+        }
+      })
+      
+       //? Now update the rest of the offer status as rejected only if the status is accepted.
+      if(status === 'accepted') {
+      const rejectedQuery =  { propertyId: acceptedOfferData.propertyId, _id: { $ne: new ObjectId(acceptedId) } }
+
+      await offeredCollection.updateMany(rejectedQuery, {
+        $set : {
+          status : 'rejected'
+        }
+      })
+      }
+                               
+      
+      res.send({message : 'updated status'});
+    })
+
     //? Save agent added property.
     app.post('/properties', verifyToken, async(req, res) => {
        const property = req.body;
