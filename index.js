@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000;
 require('dotenv').config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
 
 
 app.use(cors({
@@ -170,8 +171,25 @@ async function run() {
     //? Get all offered property for agent
     app.get('/offeredProperty', async(req, res) => {
       const email = req.query.email;
-      const query = { email : email };
+      const query = { 'agent.email' : email };
       const result = await offeredCollection.find(query).toArray();
+      res.send(result)
+    })
+
+    //? Get all offered property for agent
+    app.get('/propertyBought', async(req, res) => {
+      const email = req.query.email;
+      const query = { 'buyer.email' : email };
+      const result = await offeredCollection.find(query).toArray();
+      res.send(result)
+    })
+
+    //? Get property bought by id
+    //? Get all offered property for agent
+    app.get('/propertyBought/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = { _id : new ObjectId(id) };
+      const result = await offeredCollection.findOne(query);
       res.send(result)
     })
 
@@ -235,6 +253,27 @@ async function run() {
       const offeredProperty = req.body;
       const result = await offeredCollection.insertOne(offeredProperty);
       res.send(result);
+    })
+
+    //? Payment related api
+    
+    //? Stripe 
+    //? step : 01 generate client secret and send it to client side.
+    app.post('/create-payment-intent', async(req, res) => {
+      const price = req.body.price;
+      console.log('price', price);
+      const amount = parseFloat(price * 100);
+
+      if(!price || !amount) {
+        return;
+      }
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount : amount,
+        currency : 'usd',
+        payment_method_types : ['card']
+      })
+   
+      res.send({clientSecret : paymentIntent.client_secret});
     })
 
     // Send a ping to confirm a successful connection
