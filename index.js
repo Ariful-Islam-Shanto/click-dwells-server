@@ -136,6 +136,13 @@ async function run() {
       res.send(result);
     })
 
+    //? Get all properties for admin.
+    app.get('/allProperties/:email', async(req, res) => {
+      const email = req.params.email;
+      const result = await propertiesCollection.find().toArray();
+      res.send(result);
+    })
+
     //? Get all the verified property
     app.get('/properties', async(req, res) =>{
       const status = req.query.status;
@@ -240,6 +247,22 @@ async function run() {
                                
       
       res.send({message : 'updated status'});
+    })
+
+    app.patch('/updatePropertyStatus/:id', async(req, res) => {
+      const propertyId = req.params.id;
+      const status = req.query.status;
+      if(!status || !propertyId) {
+        return res.send({message : 'No status found'})
+      }
+
+      const query = { _id : new ObjectId(propertyId) };
+      const result = await propertiesCollection.updateOne(query, {
+        $set : {
+          status : status
+        }
+      })
+      res.send(result);
     })
 
     //? Update property by agent
