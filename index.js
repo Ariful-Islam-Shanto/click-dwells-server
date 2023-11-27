@@ -194,6 +194,13 @@ async function run() {
       res.send(result)
     })
 
+    //? Get sold properties for agent.
+    app.get('/soldProperties', async (req, res) => {
+      const email = req.query.email;
+      const query = { "agent.email" : email };
+      const result = await purchasedPropCollection.find(query).toArray();
+      res.send(result);
+    })
     //? update offered property status to accepted or rejected
     app.put('/updateOfferedStatus/:id', async (req, res) => {
       const acceptedId = req.params.id;
