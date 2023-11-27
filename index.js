@@ -242,6 +242,21 @@ async function run() {
       res.send({message : 'updated status'});
     })
 
+    //? Update property by agent
+    app.patch('/updateProperty/:id', async(req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const updatedProperty = req.body;
+      const query = { _id : new ObjectId(id) };
+      const updatedDoc = {
+        $set : {
+          ...updatedProperty
+        }
+      }
+      const result = await propertiesCollection.updateOne(query, updatedDoc);
+      res.send(result);
+    })
+
     //? Save agent added property.
     app.post('/properties', verifyToken, async(req, res) => {
        const property = req.body;
