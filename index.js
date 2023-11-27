@@ -245,6 +245,15 @@ async function run() {
     //? Save wishlist of user
     app.post('/wishlist', async(req, res) => {
        const property = req.body;
+
+       //? Check if the property already exists
+       const query = { propertyId : property.propertyId};
+       const isExist = await wishlistCollection.findOne(query);
+      //  console.log("Is the property exist ?", isExist);
+       if(isExist) {
+        return res.send({message : 'already exist'})
+       }
+
        const result = await wishlistCollection.insertOne(property);
        res.send(result);
     })
