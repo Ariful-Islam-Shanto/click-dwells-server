@@ -245,7 +245,6 @@ async function run() {
     //? Update property by agent
     app.patch('/updateProperty/:id', async(req, res) => {
       const id = req.params.id;
-      console.log(id);
       const updatedProperty = req.body;
       const query = { _id : new ObjectId(id) };
       const updatedDoc = {
@@ -354,6 +353,14 @@ async function run() {
       const id = req.params.id;
       const query = { _id : new ObjectId(id)};
       const result = await wishlistCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    //? Delete agent property.
+    app.delete('/deleteProperty/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = { _id : new ObjectId(id)};
+      const result = await propertiesCollection.deleteOne(query);
       res.send(result);
     })
     // Send a ping to confirm a successful connection
