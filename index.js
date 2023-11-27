@@ -284,6 +284,38 @@ async function run() {
       const result = await purchasedPropCollection.insertOne(propertyInfo);
       res.send(result);
     })
+
+    //? Update property bought status.
+    app.patch('/updateBoughtStatus', async(req, res) => {
+      const property = req.body;
+      // console.log("updated the bought status", property.wishlistId, property.offeredId);
+
+      //? update status on properties collection 
+      const propertyQuery = { _id : new ObjectId(property.propertyId) };
+      await propertiesCollection.updateOne(propertyQuery, {
+        $set : {
+          status : 'bought'
+        }
+      })
+
+      //? update status on wishlist collection 
+      const wishlistQuery = { _id : new ObjectId(property.wishlistId) };
+      await wishlistCollection.updateOne(wishlistQuery, {
+        $set : {
+          status : 'bought'
+        }
+      })
+
+      //? update status on offered collection 
+      const offeredQuery = { _id : new ObjectId(property.offeredId) };
+      await offeredCollection.updateOne(offeredQuery, {
+        $set : {
+          status : 'bought'
+        }
+      })
+
+      res.send({message : "updated status"})
+    })
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
