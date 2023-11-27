@@ -50,6 +50,7 @@ const propertiesCollection = database.collection('properties');
 const usersCollection = database.collection('users');
 const wishlistCollection = database.collection('wishlist');
 const offeredCollection = database.collection('offered');
+const purchasedPropCollection = database.collection('purchased_properties');
 
 async function run() {
   try {
@@ -258,7 +259,7 @@ async function run() {
     //? Payment related api
     
     //? Stripe 
-    //? step : 01 generate client secret and send it to client side.
+    //? generate client secret and send it to client side.
     app.post('/create-payment-intent', async(req, res) => {
       const price = req.body.price;
       console.log('price', price);
@@ -276,6 +277,13 @@ async function run() {
       res.send({clientSecret : paymentIntent.client_secret});
     })
 
+    
+    //? Save purchased property data into database
+    app.post('/purchased-properties', async (req, res) => {
+      const propertyInfo = req.body;
+      const result = await purchasedPropCollection.insertOne(propertyInfo);
+      res.send(result);
+    })
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
