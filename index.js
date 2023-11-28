@@ -163,7 +163,7 @@ async function run() {
 
         return res.send(result)
       }
-      
+
       const updatedDoc = {
         $set : {
           role : role
@@ -262,6 +262,15 @@ async function run() {
       const query = { "agent.email" : email };
       const result = await purchasedPropCollection.find(query).toArray();
       res.send(result);
+    })
+
+    app.get('/advertisedProperties', async (req, res) => {
+      const advertise = req.query.advertise;
+      const query = { advertise : true };
+     
+      const result = await propertiesCollection.find(query).toArray();
+      res.send(result);
+      
     })
 
 
