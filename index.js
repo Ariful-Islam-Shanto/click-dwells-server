@@ -321,6 +321,28 @@ async function run() {
       res.send(result);
     })
 
+    app.patch('/updateAdvertise', async(req, res) => {
+      const advertise = req.body;
+      const id = advertise.id;
+      const isAdvertise = advertise.isAdvertise;
+      
+      const query = { _id : new ObjectId(id) };
+
+      if(isAdvertise) {
+        const isAdvertiseMax = await propertiesCollection.find({ advertise : isAdvertise }).toArray();
+         if(isAdvertiseMax.length >= 6) {
+          return res.send({message : "limit exceeded"})
+         }
+      }
+      const updatedDoc = {
+        $set : {
+          advertise : isAdvertise
+        }
+      }
+      const result = await propertiesCollection.updateOne(query, updatedDoc);
+      res.send(result)
+    })
+
     //? Update property by agent
     app.patch('/updateProperty/:id', async(req, res) => {
       const id = req.params.id;
