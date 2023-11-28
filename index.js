@@ -273,6 +273,11 @@ async function run() {
       
     })
 
+    app.get('/getLatestReviews', async(req, res) => {
+      const result = await reviewsCollection.find().sort({time : -1}).toArray();
+      res.send(result)
+    })
+
 
     //? Get all the reviews
     app.get('/reviews', async(req, res) => {
