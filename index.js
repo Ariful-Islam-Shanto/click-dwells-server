@@ -88,6 +88,13 @@ async function run() {
     })
 
     //? User api
+
+    //? Get all users
+    app.get('/allUsers/:email', async (req, res) => {
+      const email = req.params.email;
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    })
     //? Save user
     app.put('/users/:email', async (req, res) => {
       const email = req.params.email
@@ -125,6 +132,30 @@ async function run() {
       const query = { email : email };
       const result = await usersCollection.findOne(query);
       res.send(result)
+    })
+
+    //? Update user role by admin
+    app.patch('/updateUserRole/:id', async(req, res) => {
+      const id = req.params.id;
+      const role = req.query.role;
+     
+      const query = { _id : new ObjectId(id) };
+      const updatedDoc = {
+        $set : {
+          role : role
+        }
+      }
+      const result = await usersCollection.updateOne(query, updatedDoc);
+      res.send(result);
+    })
+
+    //? Delete User by admin
+    app.delete('/deleteUser/:id', async(req, res) => {
+      const id = req.params.id;
+      const email = req.params.email;
+      const query = { _id : new ObjectId(id) };
+      const result = await usersCollection.deleteOne(query);
+      res.send(result);
     })
 
     //? Service related api
