@@ -51,6 +51,7 @@ const usersCollection = database.collection('users');
 const wishlistCollection = database.collection('wishlist');
 const offeredCollection = database.collection('offered');
 const purchasedPropCollection = database.collection('purchased_properties');
+const reviewsCollection = database.collection('reviews');
 
 async function run() {
   try {
@@ -239,6 +240,16 @@ async function run() {
       const result = await purchasedPropCollection.find(query).toArray();
       res.send(result);
     })
+
+
+    //? Get all the reviews
+    app.get('/reviews', async(req, res) => {
+      const propertyId = req.query.id;
+      
+      const query = { reviewPropertyId : propertyId };
+      const result = await reviewsCollection.find(query).toArray();
+      res.send(result);
+    })
     //? update offered property status to accepted or rejected
     app.put('/updateOfferedStatus/:id', async (req, res) => {
       const acceptedId = req.params.id;
@@ -337,6 +348,13 @@ async function run() {
     app.post('/offeredProperty', async (req, res) => {
       const offeredProperty = req.body;
       const result = await offeredCollection.insertOne(offeredProperty);
+      res.send(result);
+    })
+
+    //? Save reviews
+    app.post('/reviews', async(req, res) => {
+      const review = req.body;
+      const result = await reviewsCollection.insertOne(review);
       res.send(result);
     })
 
