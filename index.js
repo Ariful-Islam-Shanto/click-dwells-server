@@ -257,6 +257,13 @@ async function run() {
       const result = await reviewsCollection.find(query).toArray();
       res.send(result);
     })
+
+    //? Get all reviews for admin
+    app.get('/allReviews', async(req, res) => {
+      const result = await reviewsCollection.find().toArray();
+      res.send(result);
+    })
+
     //? update offered property status to accepted or rejected
     app.put('/updateOfferedStatus/:id', async (req, res) => {
       const acceptedId = req.params.id;
