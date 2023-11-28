@@ -245,8 +245,15 @@ async function run() {
     //? Get all the reviews
     app.get('/reviews', async(req, res) => {
       const propertyId = req.query.id;
-      
       const query = { reviewPropertyId : propertyId };
+      const result = await reviewsCollection.find(query).toArray();
+      res.send(result);
+    })
+
+    //? Get user added reviews
+    app.get('/myReviews', async(req, res) =>{
+      const email = req.query.email;
+      const query = { 'reviewer.email' : email };
       const result = await reviewsCollection.find(query).toArray();
       res.send(result);
     })
@@ -433,6 +440,15 @@ async function run() {
       const id = req.params.id;
       const query = { _id : new ObjectId(id)};
       const result = await propertiesCollection.deleteOne(query);
+      res.send(result);
+    })
+
+
+    //? Delete review property.
+    app.delete('/reviews/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = { _id : new ObjectId(id)};
+      const result = await reviewsCollection.deleteOne(query);
       res.send(result);
     })
     // Send a ping to confirm a successful connection
