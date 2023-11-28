@@ -141,6 +141,29 @@ async function run() {
       const role = req.query.role;
      
       const query = { _id : new ObjectId(id) };
+
+      //? handle fraud
+      //? if marked as fraud
+      if(role === 'fraud') {
+        const { email } = await usersCollection.findOne(query);
+        const fraudQuery = { 'agent.email' : email };
+        const newUpdatedDoc = { 
+           $set : {
+            status : 'rejected',
+            advertise : false
+           }
+        }
+        await propertiesCollection.updateOne(fraudQuery, newUpdatedDoc);
+
+       const result = await usersCollection.updateOne(query, {
+        $set : {
+          role : role
+        }
+       });
+
+        return res.send(result)
+      }
+      
       const updatedDoc = {
         $set : {
           role : role
@@ -367,9 +390,12 @@ async function run() {
     //? Save wishlist of user
     app.post('/wishlist', async(req, res) => {
        const property = req.body;
-
+        const email = req.query.email;
        //? Check if the property already exists
-       const query = { propertyId : property.propertyId};
+       const query = {
+         propertyId : property.propertyId,
+         'user.email' : email
+        };
        const isExist = await wishlistCollection.findOne(query);
       //  console.log("Is the property exist ?", isExist);
        if(isExist) {
@@ -383,6 +409,19 @@ async function run() {
     //? Save user offered property.
     app.post('/offeredProperty', async (req, res) => {
       const offeredProperty = req.body;
+      const wishlistId = offeredProperty.wishlistId;
+      const userEmail = req.query.email;
+
+      //? Check if already exists or not
+      const query = { 
+      wishlistId : wishlistId,
+      'buyer.email' : userEmail
+      }
+      const isExist = await offeredCollection.findOne(query);
+      if(isExist) {
+       return res.send({message: "Already exists"});
+      }
+
       const result = await offeredCollection.insertOne(offeredProperty);
       res.send(result);
     })
