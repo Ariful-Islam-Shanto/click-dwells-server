@@ -202,6 +202,7 @@ async function run() {
     app.get('/properties', async(req, res) =>{
       const status = req.query.status;
       const title = req.query.title;
+      const sort = req.query.sortBy;
       
       let query = {
         status : status
@@ -212,9 +213,65 @@ async function run() {
           status : status,
           title : title
         }
+
+        const result = await propertiesCollection.find(query).toArray();
+       return res.send(result);
       }
 
-      console.log(query);
+      if(sort === 'default') {
+         const result = await propertiesCollection.find(query).toArray();
+         return res.send(result);
+      }
+      // const sortOptions = {};
+
+      // // Add sort options based on sortOption parameter
+      // if (sort) {
+      //   if (sort === 'asc') {
+      //     sortOptions.price_range = -1; // Sort high to low
+      //   } else if (sort === 'desc') {
+      //     sortOptions.price_range = 1; // Sort low to high
+      //   }
+      // }
+
+      if(sort) {
+        console.log(sort);
+        const aggregationPipeline = [
+          {
+            $match: {
+              status: 'verified',
+            },
+          },
+          {
+            $addFields: {
+              priceArray: {
+                $map: {
+                  input: {
+                    $map: {
+                      input: { $split: [{ $replaceAll: { input: "$price_range", find: ",", replacement: "" } }, " - "] },
+                      as: "price",
+                      in: { $toDouble: "$$price" },
+                    },
+                  },
+                  as: "price",
+                  in: { $toInt: "$$price" },
+                },
+              },
+            },
+          },                   
+          {
+            $sort: {
+              "priceArray.0": sort === 'asc' ? 1 : -1,
+            },
+          }
+          
+        ];
+
+        const result = await propertiesCollection.aggregate(aggregationPipeline).toArray();
+        return res.send(result);
+      }
+
+      // console.log(sortOptions);
+      // console.log(query);
       const result = await propertiesCollection.find(query).toArray();
       res.send(result);
     } )
