@@ -188,6 +188,7 @@ async function run() {
       const email = req.params.email;
       const query = { "agent.email" : email };
       const result = await propertiesCollection.find(query).toArray();
+
       res.send(result);
     })
 
@@ -222,16 +223,6 @@ async function run() {
          const result = await propertiesCollection.find(query).toArray();
          return res.send(result);
       }
-      // const sortOptions = {};
-
-      // // Add sort options based on sortOption parameter
-      // if (sort) {
-      //   if (sort === 'asc') {
-      //     sortOptions.price_range = -1; // Sort high to low
-      //   } else if (sort === 'desc') {
-      //     sortOptions.price_range = 1; // Sort low to high
-      //   }
-      // }
 
       if(sort) {
         console.log(sort);
@@ -331,7 +322,24 @@ async function run() {
       const email = req.query.email;
       const query = { "agent.email" : email };
       const result = await purchasedPropCollection.find(query).toArray();
-      res.send(result);
+
+      const totalRevenue = await purchasedPropCollection.aggregate([
+        {
+          $match: {
+            "agent.email": email
+          }
+        },
+        {
+          $group: {
+            _id: '$agent.email',
+            totalRevenue: {
+              $sum: { $toDouble: '$totalAmount' }
+            }
+          }
+        }
+      ]).toArray();
+      const revenue = totalRevenue.length > 0 ? totalRevenue[0].totalRevenue : 0;
+      res.send({result, revenue});
     })
 
     app.get('/advertisedProperties', async (req, res) => {
