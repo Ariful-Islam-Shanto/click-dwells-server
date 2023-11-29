@@ -201,7 +201,20 @@ async function run() {
     //? Get all the verified property
     app.get('/properties', async(req, res) =>{
       const status = req.query.status;
-      const query = { status : status };
+      const title = req.query.title;
+      
+      let query = {
+        status : status
+      }
+
+      if(title) {
+        query = {
+          status : status,
+          title : title
+        }
+      }
+
+      console.log(query);
       const result = await propertiesCollection.find(query).toArray();
       res.send(result);
     } )
@@ -273,6 +286,7 @@ async function run() {
       
     })
 
+    //? Get all the latest reviews
     app.get('/getLatestReviews', async(req, res) => {
       const result = await reviewsCollection.find().sort({time : -1}).toArray();
       res.send(result)
